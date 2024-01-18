@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Not a To-Do List</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700;800&display=swap');
+
+            body {
+                background: hsl(150, 50%, 50%);
+                /* background: hsl(200, 60%, 50%); */
+            }
+
+            * {
+                font-family: 'Rethink Sans', sans-serif;
+            }
+
+            :root {
+                --trashCanOpacity: 0;
+            }
+            
+            .item {
+                margin: 0;
+                padding-inline: 10px;
+                padding-block: 5px;
+                cursor: pointer;
+                width: fit-content;
+                max-width: 1000px;
+                text-wrap: pretty;
+                word-wrap: break-word;
+                display: flex;
+                align-items: center;
+            }
+
+            .item svg {
+                transition: 0.3s ease-in-out;
+                opacity: var(--trashCanOpacity);
+            }
+
+            .item:hover svg, .item:focus svg {
+                opacity: 1;
+            }
+
+            .item svg:hover, .item svg:focus {
+                opacity: 1;
+                color: red;
+            }
+
+            .item span {
+                margin-left: 5px;
+            }
+
+            .item input {
+                border-radius: 50px;
+                padding: 10px;
+                outline: 0;
+                border: 1px solid black;
+                margin-left: 5px;
+            }
+
+            .item:last-child {
+                margin-bottom: 20px;
+            }
+
+            #inputText {
+                border-radius: 50px;
+                padding: 10px;
+                outline: 0;
+                border: 1px solid black;
+            }
+
+            #add {
+                border-radius: 200%;
+                width: 38px;
+                height: 38px;
+                text-align: center;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                outline: 0;
+                border: 1px solid black;
+                background: white;
+            }
+
+            #add:hover {
+                background: #e8e8e8;
+            }
+
+            #add:active {
+                background: #d8d8d8;
+            }
+
+            #inputs {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            /* Settings */
+            #settings {
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
+
+            #settingsIcon {
+                margin-right: 5px;
+                margin-top: 5px;
+                cursor: pointer;
+                width: 25px;
+                height: 25px;
+            }
+
+            #settingsPopup {
+                position: absolute;
+                width: 250px;
+                right: 10px;
+                outline: 1px solid gray;
+                padding: 10px;
+                border-radius: 20px;
+                background: white;
+                opacity: 1;
+                transition: 0.3s ease-in-out;
+            }
+
+            input[type="checkbox"], input[type="checkbox"] + label {
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Not a To-do List</h1>
+        <div id="output"></div>
+        <!-- <label for="inputText">Type To-Do: </label> -->
+        <div id="inputs">
+            <input type="text" id="inputText" autofocus placeholder="Type a To-do"/>
+            <button id="add" title="Add To-do">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                </svg>
+            </button>
+        </div>
+        <div id="settings">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16" id="settingsIcon">
+                <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+            </svg>
+            <div id="settingsPopup">
+                <input type="checkbox" id="showIcons" />
+                <label for="showIcons">Always show icons</label>
+            </div>
+        </div>
+        
+        <script defer>
+            const todoInput = document.querySelector('#inputText');
+            
+            document.querySelector('#add').addEventListener('click', add);
+            
+            let msgs = [];
+
+            // Add a to-do
+            function add() {
+                if (todoInput.value != "" && todoInput.value != " ") {
+                    msgs.push(todoInput.value);
+                    todoInput.value = "";
+                    todoInput.focus();
+                    renderScreen();
+                }
+            }
+
+            // Remove a todo
+            function remove(index) {
+                let newArr = [];
+                let newArrI = 0;
+                for (let i = 0; i < msgs.length; i++) {
+                    if (i != (index - 1)) {
+                        newArr[newArrI] = msgs[i];
+                    } else {
+                        // transfer nothing
+                        newArrI--;
+                    }
+                    newArrI++;
+                }
+                msgs = newArr;
+                todoInput.focus();
+                renderScreen();
+            }
+            
+            function renderScreen() {    
+                document.querySelector('#output').innerHTML = '';
+                for (let i = 0; i < msgs.length; i++) {
+                    // <p> tag that houses everything
+                    let p = document.createElement('p');
+                    p.innerHTML = (i+1) + ". ";
+                    p.classList.add('item');
+
+                    // <span> that has the normal to-do text
+                    let span = document.createElement('span');
+                    span.id = "msg" + i;
+                    span.innerText = " " + msgs[i];
+                    span.style.display = "static";
+                    p.appendChild(span);
+
+                    // <input /> that will be hidden by default
+                    // Shown only to allow for to-do editing
+                    let input = document.createElement('input');
+                    input.value = msgs[i];
+                    input.id = "msg-edit" + i;
+                    p.appendChild(input);
+                    input.style.display = "none";
+
+                    // Checkmark <svg><path /></svg>
+                    // Used only to confirm to-do edits
+                    let checkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    checkSvg.setAttribute('width', "20");
+                    checkSvg.setAttribute('height', "20");
+                    checkSvg.setAttribute('fill', "currentColor");
+                    checkSvg.setAttribute('class', 'bi bi-check');
+                    checkSvg.setAttribute('viewBox', '0 0 16 16');
+                    checkSvg.style.marginLeft = "10px";
+                    checkSvg.tabIndex = 1;
+
+                    let checkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    checkPath.setAttribute('d', 'M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z');
+
+                    // Append <path /> to <svg></svg>
+                    checkSvg.appendChild(checkPath);
+
+                    // Append <svg><path /></svg> to <p>
+                    p.appendChild(checkSvg);
+
+                    // Add event listener for click on to the checkmark for to-do editing confirmation
+                    checkSvg.addEventListener('click', function() {
+                        if (input.value != '' && input.value != ' ') {
+                            span.style.display = "block";
+                            span.innerText = input.value;
+                            msgs[i] = input.value;
+                            input.style.display = "none";
+                            checkSvg.style.display = "none";
+                        }
+                    });
+
+                    // Hide the checkmark SVG
+                    checkSvg.style.display = "none";
+
+                    // Add event listener to the <span> to allow for editing
+                    span.addEventListener('click', function() {
+                        span.style.display = "none";
+                        input.style.display = "inline-flex";
+                        checkSvg.style.display = "block";
+                    });
+
+                    // Trash <svg><path /></svg> for to-do deletion
+                    let trashSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    trashSvg.setAttribute('width', "16");
+                    trashSvg.setAttribute('height', "16");
+                    trashSvg.setAttribute('fill', "currentColor");
+                    trashSvg.setAttribute('class', 'bi bi-trash-fill');
+                    trashSvg.setAttribute('viewBox', '0 0 16 16');
+                    trashSvg.style.marginLeft = "10px";
+                    trashSvg.tabIndex = 1;
+
+                    let trashPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    trashPath.setAttribute('d', 'M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0');
+
+                    // Append <path /> to <svg></svg>
+                    trashSvg.appendChild(trashPath);
+
+                    // Apend <svg><path /></svg> to <p>
+                    p.appendChild(trashSvg);
+
+                    // Add event listener to <svg><path /></svg> to allow for to-do deletion
+                    trashSvg.addEventListener('click', function () {
+                        remove(i+1);
+                    });
+
+                    // Append the <p></p> to the <div id="output"></div>
+                    document.querySelector('#output').appendChild(p);
+                }
+            }
+
+            // Settings menu
+            const gearIcon = document.querySelector('#settingsIcon');
+            const settingsMenu = document.querySelector('#settingsPopup');
+
+            // Setting menu hidden by default
+            // Using opacity instead of display to allow for animation
+            settingsMenu.style.opacity = 0;
+
+            // Function to show settings menu
+            function showSettingsMenu() {
+                if (settingsMenu.style.opacity == 0) {
+                    settingsMenu.style.opacity = 1;
+                    settingsMenu.children[0].focus();
+                } else {
+                    settingsMenu.style.opacity = 0;
+                    todoInput.focus();
+                }
+            }
+
+            // When the gear icon is clicked in the top right, open settings menu
+            gearIcon.addEventListener('click', function() {
+                showSettingsMenu();
+            });
+
+            // Variable to keep track of keybind and what is pressed for setting menu opening with keyboard shortcut of Alt + S
+            let settingsMap = {
+                alt: false,
+                s: false
+            };
+
+            document.addEventListener('keydown', function (e) {
+                // If enter is pressed and the to-do input is in focus
+                if (e.key == 'Enter') {
+                    if (document.activeElement == document.querySelector('#inputText')) {
+                        document.querySelector('#add').click();
+                    }
+                }
+
+                // If Alt in Alt + S shortcut is pressed
+                if (e.key == 'Alt') {
+                    settingsMap.alt = true;
+                }
+
+                // If s in Alt + S shortcut is pressed
+                if (e.key == 's') {
+                    settingsMap.s = true;
+                }
+                
+                // If both Alt and S are pressed, open the settings menu
+                if (settingsMap.alt && settingsMap.s) {
+                    showSettingsMenu();
+                }
+            });
+
+            document.addEventListener('keyup', function (e) {
+                if (e.key == 'Alt') {
+                    settingsMap.alt = false;
+                }
+
+                if (e.key == 's') {
+                    settingsMap.s = false;
+                }
+            });
+
+            var root = document.querySelector(':root');
+            const showIcons = document.querySelector('#showIcons');
+            showIcons.addEventListener('input', function () {
+                if (showIcons.checked == true) {
+                    root.style.setProperty('--trashCanOpacity', '1');
+                } else {
+                    root.style.setProperty('--trashCanOpacity', '0');
+                }
+            });
+        </script>
+    </body>
+</html>
