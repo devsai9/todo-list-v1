@@ -22,3 +22,11 @@ Use: https://devsai9.github.io/todo-list-v1
 4. Using the Chromebook's Text app
 5. Working with Javascript's <code>document.createElement()</code>
 6. Working with SVGs in JavaScript
+7. Working with CSS in JavaScript (ex. modifying CSS variables from JavaScript)
+
+## Technologies used
+<ul>
+  <li>HTML</li>
+  <li>CSS</li>
+  <li>JavaScript</li>
+</ul>
