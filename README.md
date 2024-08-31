@@ -18,7 +18,7 @@ Use: https://devsai9.github.io/todo-list-v1
 ## What I learned/refined
 1. HTML development on a Chromebook
 2. CSS development on a Chromebook
-3. JavaScript Development on a Chromebook
+3. JavaScript development on a Chromebook
 4. Using the Chromebook's Text app
 5. Working with Javascript's <code>document.createElement()</code>
 6. Working with SVGs in JavaScript
